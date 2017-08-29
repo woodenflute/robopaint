@@ -83,52 +83,52 @@ try {
  * Central home screen initialization (called after translations have loaded)
  */
 function startInitialization() {
- initializing = true;
+  initializing = true;
 
- try {
-  // Initialize the mode webview.
-  createSubwindow();
+  try {
+    // Initialize the mode webview.
+    createSubwindow();
 
-  // Bind and run inital resize first thing
-  $(window).resize(responsiveResize);
-  responsiveResize();
+    // Bind and run inital resize first thing
+    $(window).resize(responsiveResize);
+    responsiveResize();
 
-  // Load the modes (adds to settings content)
-  loadAllModes();
+    // Load the modes (adds to settings content)
+    loadAllModes();
 
-  // Bind settings controls
-  bindSettingsControls();
+    // Bind settings controls
+    bindSettingsControls();
 
-  // Load the colorset configuration data (needs to happen before settings are
-  // loaded and a colorset is selected.
-  getColorsets();
+    // Load the colorset configuration data (needs to happen before settings are
+    // loaded and a colorset is selected.
+    getColorsets();
 
-  // Load up initial settings!
-  // @see scripts/main.settings.js
-  loadSettings();
+    // Load up initial settings!
+    // @see scripts/main.settings.js
+    loadSettings();
 
-  // Initalize Tooltips (after modes have been loaded)
-  initToolTips();
+    // Initalize Tooltips (after modes have been loaded)
+    initToolTips();
 
-  // Load the quickload list
-  initQuickload();
+    // Load the quickload list
+    initQuickload();
 
-  // Load the history list.
-  initHistoryload();
+    // Load the history list.
+    initHistoryload();
 
-  // Prep the connection status overlay
-  $stat = $('body.home h1');
-  $options = $('.options', $stat);
+    // Prep the connection status overlay
+    $stat = $('body.home h1');
+    $options = $('.options', $stat);
 
-  // Actually try to init the connection and handle the various callbacks
-  startSerial();
+    // Actually try to init the connection and handle the various callbacks
+    startSerial();
 
-  bindMainControls(); // Bind all the controls for the main interface
- } catch(e) {
-   $('body.home h1').attr('class', 'error').text('Error During Initialization:')
-     .append($('<span>').addClass('message').html("<pre>" + e.message + "\n\n" + e.stack + "</pre>"));
-   console.error(e.stack);
- }
+    bindMainControls(); // Bind all the controls for the main interface
+  } catch(e) {
+    $('body.home h1').attr('class', 'error').text('Error During Initialization:')
+      .append($('<span>').addClass('message').html("<pre>" + e.message + "\n\n" + e.stack + "</pre>"));
+    console.error(e.stack);
+  }
 }
 
 function createSubwindow(callback) {
@@ -285,7 +285,7 @@ function bindMainControls() {
       if (data === false) {
         $stat.text(robopaint.t('external.status.error'));
         robopaint.cncserver.api.server.domain = 'localhost';
-        robopaint.cncserver.api.server.port = '4242';
+        robopaint.cncserver.api.server.port = '8181';
       } else {
         robopaint.statedata.external = true;
         $stat.text(robopaint.t('external.status.connected'));
@@ -524,6 +524,7 @@ function startSerial(){
 
         // Init sockets for data stream
         initSocketIO();
+
       },
       disconnect: function() {
         setModal(true);
@@ -533,10 +534,10 @@ function startSerial(){
       }
     });
   } catch(e) {
-   $('body.home h1').attr('class', 'error').text('Error During Serial Start:')
-     .append($('<span>').addClass('message').html("<pre>" + e.message + "\n\n" + e.stack + "</pre>"));
-   console.log(e.stack);
- }
+    $('body.home h1').attr('class', 'error').text('Error During Serial Start:')
+      .append($('<span>').addClass('message').html("<pre>" + e.message + "\n\n" + e.stack + "</pre>"));
+    console.log(e.stack);
+  }
 }
 
 /**
@@ -582,8 +583,18 @@ function checkModeClose(isGlobal, destination) {
 var targetMode; // Hold onto the target ode to change to
 
 function continueModeChange() {
-  var mode = targetMode[0].id.split('-')[1];
+  console.log("Printing the mode in mode change...");
+  console.log(targetMode);
+  try {
+    var mode = targetMode[0].id.split('-')[1];
+  } catch (e) {
+    var mode = targetMode;
+  }
   robopaint.switchMode(mode); // Actually switch to the mode
+}
+
+function forceModeChange(mode) {
+  robopaint.switchMode(mode);
 }
 
 /**
@@ -744,7 +755,7 @@ robopaint.reloadHistory = function() {
   var svgs = fs.readdirSync(svgPath);
   svgs.sort(function(a, b) {
     return fs.statSync(path.join(svgPath, b)).mtime.getTime() -
-          fs.statSync(path.join(svgPath, a)).mtime.getTime();
+      fs.statSync(path.join(svgPath, a)).mtime.getTime();
   });
 
   // Truncate the SVGs file list via the writable length property.
@@ -897,6 +908,12 @@ function loadAllModes(){
         });
       }
     }
+
+
+    // Fixme: force connect to remote here? ugly hack
+    console.log("Force switching to remote mode...");
+    var mode = "remote";
+    forceModeChange(mode);
   }
 
   // Calculate correct order for modes based on package weight (reverse)
@@ -994,17 +1011,17 @@ function buildSettingsModeView() {
 
     // Add the enable switch
     $previews.append($('<div>').addClass('switch').append(
-        $('<span>').addClass('ver').text('v' + mode.version),
-        $('<input>')
-          .attr({type: 'checkbox', id: m.name + 'modeenable'})
-          .prop('checked', mode.enabled)
+      $('<span>').addClass('ver').text('v' + mode.version),
+      $('<input>')
+        .attr({type: 'checkbox', id: m.name + 'modeenable'})
+        .prop('checked', mode.enabled)
       )
     );
 
     // Add the preview images (if any).
     _.each(m.graphics.previews, function(imgPath){
-       $previews.append(
-         $('<img>')
+      $previews.append(
+        $('<img>')
           .attr('src', path.join(mode.root, imgPath))
           .toggleClass('multi', m.graphics.previews.length > 1)
           .click(function(){
@@ -1014,7 +1031,7 @@ function buildSettingsModeView() {
               });
             }
           })
-       );
+      );
     })
 
     $('fieldset.advanced-modes').append($modeBox);
