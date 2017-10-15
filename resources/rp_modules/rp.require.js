@@ -3,8 +3,7 @@
  * various named shortcut robopaint specific CommonJS modules listed below.
  */
 
-var app = require('electron').remote.app;
-var appPath = app.getAppPath();
+var appPath = '/home/mudi/Tink/robopaint-experimental';
 var _ = require('underscore');
 
 // List of shortcuts and paths to RP modules and other libraries.
